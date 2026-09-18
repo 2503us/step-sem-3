@@ -29,6 +29,7 @@ public class RaceEntry {
     }
 
     protected void applyLateFee(double amount) {
+
         balanceDue = balanceDue + amount;
 
         lateFeeHistory[lateFeeHistoryCount] = amount;
@@ -55,6 +56,7 @@ public class RaceEntry {
     }
 
     public String announce() {
+
         return "Race Entry | Bib: " + bibNumber
                 + " | Balance: " + balanceDue;
     }
@@ -71,6 +73,7 @@ public class RaceEntry {
             try {
                 new RaceEntry(bibNumbers[i], entryFee);
                 registered++;
+
             } catch (IllegalArgumentException e) {
                 rejected++;
             }
@@ -104,27 +107,53 @@ public class RaceEntry {
         return total;
     }
 
+    public static String announceAll(RaceEntry[] entries) {
+
+        StringBuilder report = new StringBuilder();
+
+        for (int i = 0; i < entries.length; i++) {
+
+            report.append(entries[i].announce());
+
+            if (entries[i] instanceof RelayTeamEntry) {
+
+                RelayTeamEntry relay =
+                        (RelayTeamEntry) entries[i];
+
+                report.append(" [Team size via downcast: ")
+                        .append(relay.getTeamSize())
+                        .append("]");
+            }
+
+            report.append(" | ");
+        }
+
+        return report.toString();
+    }
+
     public static void main(String[] args) {
 
-        RunnerEntry r =
+        RunnerEntry runnerEntry =
                 new RunnerEntry(
                         "BIB2001",
                         80,
                         "Open 10K"
                 );
 
-        r.pay(30);
+        RelayTeamEntry relayEntry =
+                new RelayTeamEntry(
+                        "BIB4001",
+                        300,
+                        4
+                );
 
-        r.applyLateFee(20);
+        RaceEntry[] fleet = {
+                runnerEntry,
+                relayEntry
+        };
 
-        System.out.println(r.getBalanceDue());
-
-        double[] history = r.getLateFeeHistory();
-
-        System.out.println(history[0]);
-
-        history[0] = 999;
-
-        System.out.println(r.getLateFeeHistory()[0]);
+        System.out.println(
+                announceAll(fleet)
+        );
     }
 }
