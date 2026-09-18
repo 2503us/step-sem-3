@@ -25,4 +25,10 @@ public class RunnerEntry extends RaceEntry {
                 + " | Category: " + category
                 + " | Balance: " + getBalanceDue();
     }
+
+    @Override
+    protected void applyLateFee(double amount) {
+
+        super.applyLateFee(amount * 2);
+    }
 }

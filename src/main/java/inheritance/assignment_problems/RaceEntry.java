@@ -6,11 +6,12 @@ public class RaceEntry {
     private double entryFee;
     private double balanceDue;
 
+    private double[] lateFeeHistory = new double[10];
+    private int lateFeeHistoryCount = 0;
+
     public RaceEntry(String bibNumber, double entryFee) {
 
-        if (bibNumber == null ||
-                bibNumber.trim().length() < 4) {
-
+        if (bibNumber == null || bibNumber.trim().length() < 4) {
             throw new IllegalArgumentException("Invalid bib number");
         }
 
@@ -25,6 +26,24 @@ public class RaceEntry {
 
     public double getBalanceDue() {
         return balanceDue;
+    }
+
+    protected void applyLateFee(double amount) {
+        balanceDue = balanceDue + amount;
+
+        lateFeeHistory[lateFeeHistoryCount] = amount;
+        lateFeeHistoryCount++;
+    }
+
+    public double[] getLateFeeHistory() {
+
+        double[] copy = new double[lateFeeHistoryCount];
+
+        for (int i = 0; i < lateFeeHistoryCount; i++) {
+            copy[i] = lateFeeHistory[i];
+        }
+
+        return copy;
     }
 
     public String getBibNumber() {
@@ -52,7 +71,6 @@ public class RaceEntry {
             try {
                 new RaceEntry(bibNumbers[i], entryFee);
                 registered++;
-
             } catch (IllegalArgumentException e) {
                 rejected++;
             }
@@ -88,16 +106,6 @@ public class RaceEntry {
 
     public static void main(String[] args) {
 
-        try {
-            RaceEntry entry =
-                    new RaceEntry("B1", 50);
-
-            System.out.println("Construction succeeded");
-
-        } catch (IllegalArgumentException e) {
-            System.out.println("construction rejected");
-        }
-
         RunnerEntry r =
                 new RunnerEntry(
                         "BIB2001",
@@ -107,60 +115,16 @@ public class RaceEntry {
 
         r.pay(30);
 
+        r.applyLateFee(20);
+
         System.out.println(r.getBalanceDue());
 
-        String[] bibNumbers = {
-                "BIB1",
-                "B1",
-                "BIB2"
-        };
+        double[] history = r.getLateFeeHistory();
 
-        System.out.println(
-                registerBatch(bibNumbers, 80)
-        );
+        System.out.println(history[0]);
 
-        RunnerEntry runnerEntry =
-                new RunnerEntry(
-                        "BIB2001",
-                        80,
-                        "Open 10K"
-                );
+        history[0] = 999;
 
-        EliteRunnerEntry eliteEntry =
-                new EliteRunnerEntry(
-                        "BIB3001",
-                        150,
-                        "Elite Full Marathon",
-                        500
-                );
-
-        RelayTeamEntry relayEntry =
-                new RelayTeamEntry(
-                        "BIB4001",
-                        300,
-                        4
-                );
-
-        System.out.println(runnerEntry.announce());
-        System.out.println(eliteEntry.announce());
-        System.out.println(relayEntry.announce());
-
-        System.out.println(
-                classifyGeneration(eliteEntry)
-        );
-
-        System.out.println(
-                classifyGeneration(relayEntry)
-        );
-
-        RaceEntry[] entries = {
-                runnerEntry,
-                eliteEntry,
-                relayEntry
-        };
-
-        System.out.println(
-                getTotalBalanceDue(entries)
-        );
+        System.out.println(r.getLateFeeHistory()[0]);
     }
 }
