@@ -6,6 +6,10 @@ public class RaceEntry {
     private double entryFee;
     private double balanceDue;
 
+    private final String entryCode;
+
+    private static int bibCounter = 0;
+
     private double[] lateFeeHistory = new double[10];
     private int lateFeeHistoryCount = 0;
 
@@ -18,10 +22,22 @@ public class RaceEntry {
         this.bibNumber = bibNumber;
         this.entryFee = entryFee;
         this.balanceDue = entryFee;
+
+        bibCounter++;
+        entryCode = "ENTRY" + bibCounter;
     }
 
     public void pay(double amount) {
         balanceDue = balanceDue - amount;
+    }
+
+    public void pay(double amount, String mode) {
+        pay(amount);
+
+        System.out.println(
+                "Payment of " + amount
+                        + " received by " + mode
+        );
     }
 
     public double getBalanceDue() {
@@ -55,9 +71,14 @@ public class RaceEntry {
         return entryFee;
     }
 
+    public String getEntryCode() {
+        return entryCode;
+    }
+
     public String announce() {
 
         return "Race Entry | Bib: " + bibNumber
+                + " | Entry Code: " + entryCode
                 + " | Balance: " + balanceDue;
     }
 
@@ -131,29 +152,136 @@ public class RaceEntry {
         return report.toString();
     }
 
-    public static void main(String[] args) {
+    public static boolean isValidDiscountCode(String code) {
 
-        RunnerEntry runnerEntry =
-                new RunnerEntry(
-                        "BIB2001",
-                        80,
-                        "Open 10K"
+        if (code == null || code.length() != 5) {
+            return false;
+        }
+
+        if (code.charAt(0) != 'M') {
+            return false;
+        }
+
+        if (!Character.isDigit(code.charAt(1))) {
+            return false;
+        }
+
+        if (!Character.isDigit(code.charAt(2))) {
+            return false;
+        }
+
+        if (!Character.isDigit(code.charAt(3))) {
+            return false;
+        }
+
+        if (!Character.isUpperCase(code.charAt(4))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static String settleNight(RaceEntry[] entries) {
+
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < entries.length; i++) {
+
+            if (entries[i] == null) {
+                continue;
+            }
+
+            if (entries[i] instanceof RelayTeamEntry) {
+
+                RelayTeamEntry relay =
+                        (RelayTeamEntry) entries[i];
+
+                result.append(
+                        "Relay Team | Bib: "
+                                + relay.getBibNumber()
+                                + " | Team Size: "
+                                + relay.getTeamSize()
+                                + " | Balance: "
+                                + relay.getBalanceDue()
                 );
 
-        RelayTeamEntry relayEntry =
+            } else {
+
+                result.append(
+                        "Individual | Bib: "
+                                + entries[i].getBibNumber()
+                                + " | Balance: "
+                                + entries[i].getBalanceDue()
+                );
+            }
+
+            result.append("\n");
+        }
+
+        return result.toString();
+    }
+
+    public static int getBibCounter() {
+        return bibCounter;
+    }
+
+    public static void main(String[] args) {
+
+        RaceEntry entry1 =
+                new RaceEntry(
+                        "BIB1001",
+                        100
+                );
+
+        RaceEntry entry2 =
+                new RaceEntry(
+                        "BIB1002",
+                        200
+                );
+
+        System.out.println(
+                entry1.getEntryCode()
+        );
+
+        System.out.println(
+                entry2.getEntryCode()
+        );
+
+        System.out.println(
+                getBibCounter()
+        );
+
+        System.out.println(
+                isValidDiscountCode("M123A")
+        );
+
+        System.out.println(
+                isValidDiscountCode("M12AA")
+        );
+
+        entry1.pay(30);
+
+        entry1.pay(
+                20,
+                "UPI"
+        );
+
+        RelayTeamEntry relay =
                 new RelayTeamEntry(
                         "BIB4001",
                         300,
                         4
                 );
 
-        RaceEntry[] fleet = {
-                runnerEntry,
-                relayEntry
+        RaceEntry[] entries = {
+                entry1,
+                null,
+                relay,
+                entry2
         };
 
         System.out.println(
-                announceAll(fleet)
+                settleNight(entries)
         );
     }
 }
