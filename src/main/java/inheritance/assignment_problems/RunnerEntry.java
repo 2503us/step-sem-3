@@ -17,4 +17,12 @@ public class RunnerEntry extends RaceEntry {
     public String getCategory() {
         return category;
     }
+
+    @Override
+    public String announce() {
+
+        return "Runner Entry | Bib: " + getBibNumber()
+                + " | Category: " + category
+                + " | Balance: " + getBalanceDue();
+    }
 }
